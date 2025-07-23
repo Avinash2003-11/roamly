@@ -15,7 +15,8 @@ connectDB();
 // ✅ Middlewares
 app.use(express.json()); // To parse JSON requests
 app.use(cors({
-    origin: 'http://localhost:3000', // Or your frontend URL
+    origin: 'http://127.0.0.1:5500',  // OR use regex to allow both
+ // Or your frontend URL
     credentials: true, // Allow cookies
 }));
 app.use(cookieParser()); // To parse cookies

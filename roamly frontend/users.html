@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Roamly - Login/Register/Profile</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f2f2;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 400px;
+            margin: 50px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .switch-link {
+            text-align: center;
+            margin-top: 10px;
+            cursor: pointer;
+            color: #007BFF;
+        }
+        .profile {
+            display: none;
+        }
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .avatar {
+            background: #FFD700;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 60px;
+            font-weight: bold;
+            font-size: 20px;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 15px;
+        }
+        .stat {
+            text-align: center;
+        }
+        .finds img {
+            width: 100%;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="login-container">
+        <h2>Login</h2>
+        <input type="email" id="login-email" placeholder="Email" required>
+        <input type="password" id="login-password" placeholder="Password" required>
+        <button onclick="login()">Login</button>
+        <div class="switch-link" onclick="showRegister()">Don't have an account? Register</div>
+    </div>
+
+    <div class="container" id="register-container" style="display:none;">
+        <h2>Register</h2>
+        <input type="text" id="register-name" placeholder="Name" required>
+        <input type="email" id="register-email" placeholder="Email" required>
+        <input type="password" id="register-password" placeholder="Password" required>
+        <input type="password" id="register-confirm" placeholder="Confirm Password" required>
+        <input type="text" id="register-preferences" placeholder="preferences" required>
+        <input type="text"  id="hometown" placeholder="hometown" required>
+        <button onclick="register()">Register</button>
+        <div class="switch-link" onclick="showLogin()">Already have an account? Login</div>
+    </div>
+
+    <div class="container profile" id="profile-container">
+        <div class="profile-header">
+            <div class="avatar" id="profile-avatar">BG</div>
+            <div>
+                <h3 id="profile-name">Bharath G</h3>
+                <p id="profile-hometown">Hometown - Chennai</p>
+                <p>159 Views</p>
+            </div>
+        </div>
+        <p><strong>Rating:</strong> 5.00 | Ratings: 5</p>
+        <p id="profile-about">About: Loading...</p>
+        <div class="stats">
+            <div class="stat">
+                <strong id="profile-followers">0</strong><br>Followers
+            </div>
+            <div class="stat">
+                <strong id="profile-interests">0</strong><br>Interests
+            </div>
+            <div class="stat">
+                <strong id="profile-places">0</strong><br>Places Visited
+            </div>
+            <div class="stat">
+                <strong id="profile-links">0</strong><br>Social Links
+            </div>
+        </div>
+        <h4>Finds</h4>
+        <div class="finds">
+            <img src="https://source.unsplash.com/400x200/?mountain" alt="Find 1">
+            <img src="https://source.unsplash.com/400x200/?valley" alt="Find 2">
+        </div>
+        <button onclick="logout()">Logout</button>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000/api/auth';
+
+        function showRegister() {
+            document.getElementById('login-container').style.display = 'none';
+            document.getElementById('register-container').style.display = 'block';
+        }
+        function showLogin() {
+            document.getElementById('register-container').style.display = 'none';
+            document.getElementById('login-container').style.display = 'block';
+        }
+
+        async function register() {
+            const name = document.getElementById('register-name').value;
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            const confirmpassword = document.getElementById('register-confirm').value;
+            const preferences = document.getElementById('register-preferences').value;
+            const hometown = document.getElementById('hometown').value;
+
+            const res = await fetch(`${API_URL}/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ name, email, password, confirmpassword, preferences: [preferences], hometown })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                alert(data.message);
+                showLogin();
+            } else {
+                alert(data.message || 'Registration failed');
+            }
+        }
+
+        async function login() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+
+            const res = await fetch(`${API_URL}/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ email, password })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                loadProfile(data.user, data.about);
+            } else {
+                alert(data.message || 'Login failed');
+            }
+        }
+
+        function loadProfile(user, about) {
+            document.getElementById('login-container').style.display = 'none';
+            document.getElementById('register-container').style.display = 'none';
+            document.getElementById('profile-container').style.display = 'block';
+
+            document.getElementById('profile-avatar').textContent = user.name.slice(0,2).toUpperCase();
+            document.getElementById('profile-name').textContent = user.name;
+            document.getElementById('profile-hometown').textContent = `Hometown - ${user.name}`;
+            document.getElementById('profile-about').textContent = about || "No about provided.";
+        }
+
+        function logout() {
+            fetch(`${API_URL}/logout`, { credentials: 'include' });
+            showLogin();
+            document.getElementById('profile-container').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
