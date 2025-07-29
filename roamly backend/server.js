@@ -3,8 +3,8 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 require('dotenv').config(); // Load .env variables
 
-const connectDB = require('./roamly backend/config/db'); // MongoDB connection
-const userRoutes = require('./roamly backend/routes/userroutes'); // User auth routes
+const connectDB = require('./config/db'); // MongoDB connection
+const userRoutes = require('./routes/userroutes'); // User auth routes
 
 const app = express();
 const PORT = process.env.PORT || 3000;
